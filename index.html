@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>數位科技概論 (上) 第 3 回：系統平台的組成架構－硬體 | 互動試卷與學習平台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-light">
+  <!-- Top Navigation Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-badge">資處科專用</div>
+        <div class="brand-text">
+          <h1>數位科技概論（上）隨堂測驗智慧學習網</h1>
+          <p class="subtitle">第 3 回：系統平台的組成架構－硬體（第 3 章全範圍）</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Quick Stats Pill -->
+        <div class="stat-pill" title="考卷原始成績">
+          <span class="stat-label">原卷得分</span>
+          <span class="stat-value highlight">68+4 = 72 分</span>
+        </div>
+
+        <button id="themeToggleBtn" class="btn btn-icon" title="切換深色/淺色模式" aria-label="切換外觀主題">
+          <span class="icon" id="themeIcon">🌙</span>
+        </button>
+
+        <button id="soundToggleBtn" class="btn btn-icon" title="音效開關" aria-label="音效開關">
+          <span class="icon" id="soundIcon">🔊</span>
+        </button>
+
+        <button id="printBtn" class="btn btn-outline" title="列印考卷與訂正單">
+          <span class="icon">🖨️</span> 列印 / 匯出
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" aria-label="分頁導覽">
+      <button class="nav-tab active" data-tab="tab-dual">
+        <span class="tab-icon">📑</span> 原卷圖文對照
+      </button>
+      <button class="nav-tab" data-tab="tab-quiz">
+        <span class="tab-icon">✍️</span> 線上模擬測驗
+      </button>
+      <button class="nav-tab" data-tab="tab-correction">
+        <span class="tab-icon">🔴</span> 錯題深度訂正 <span class="badge-count" id="wrongCountBadge">3</span>
+      </button>
+      <button class="nav-tab" data-tab="tab-notes">
+        <span class="tab-icon">💡</span> 第3章重點手冊
+      </button>
+      <button class="nav-tab" data-tab="tab-analytics">
+        <span class="tab-icon">📊</span> 實力弱點診斷
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-content">
+    
+    <!-- ================= TAB 1: 原卷圖文對照 ================= -->
+    <section id="tab-dual" class="tab-panel active">
+      <div class="dual-layout">
+        
+        <!-- Left: Image Viewer with Interactive Overlay -->
+        <div class="image-viewer-card">
+          <div class="viewer-toolbar">
+            <div class="toolbar-title">
+              <span class="dot live-dot"></span>
+              <strong>原始考卷高畫質掃描</strong>
+              <small>（點擊題目區塊可直接跳轉與同步高亮）</small>
+            </div>
+            <div class="toolbar-buttons">
+              <button id="zoomInBtn" class="btn btn-sm" title="放大">➕ 放大</button>
+              <button id="zoomOutBtn" class="btn btn-sm" title="縮小">➖ 縮小</button>
+              <button id="zoomResetBtn" class="btn btn-sm" title="重設比例">🔄 重設</button>
+              <button id="toggleOverlayBtn" class="btn btn-sm btn-primary" title="切換互動熱區">🎯 標記熱區: 開</button>
+            </div>
+          </div>
+
+          <!-- Exam Meta Banner -->
+          <div class="exam-banner">
+            <div class="banner-item"><strong>科目：</strong>數位科技概論(上) 第3回</div>
+            <div class="banner-item"><strong>班級：</strong>資處科 一年仁班</div>
+            <div class="banner-item"><strong>題型：</strong>選擇題 (共13題 / 每題4分)</div>
+            <div class="banner-item"><strong>得分：</strong><span class="score-tag">68 + 4 分</span> <span class="sub-score">(-32)</span></div>
+          </div>
+
+          <div class="image-scroll-wrapper" id="imageWrapper">
+            <div class="image-inner-container" id="imageContainer">
+              <img id="examImg" src="IMG_20261112_151715.jpg" alt="數位科技概論 (上) 隨堂測驗卷" class="exam-image" />
+              <!-- Hotspot layers will be generated dynamically by JS -->
+              <div id="hotspotOverlay" class="hotspot-overlay"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Synchronized Interactive Cards -->
+        <div class="question-list-card">
+          <div class="filter-bar">
+            <div class="filter-chips">
+              <button class="chip active" data-filter="all">全部題目 (13)</button>
+              <button class="chip chip-wrong" data-filter="wrong">原卷錯題 (3)</button>
+              <button class="chip" data-filter="starred">我的收藏 (<span id="starredCount">0</span>)</button>
+              <button class="chip" data-filter="cat-cpu">CPU 與架構</button>
+              <button class="chip" data-filter="cat-memory">記憶體</button>
+              <button class="chip" data-filter="cat-io">五大單元/IO</button>
+            </div>
+            <div class="quick-jump">
+              <label for="jumpSelect">快速跳題：</label>
+              <select id="jumpSelect" class="form-select"></select>
+            </div>
+          </div>
+
+          <div id="questionsContainer" class="questions-scroll-area">
+            <!-- Questions cards rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: 線上模擬測驗 ================= -->
+    <section id="tab-quiz" class="tab-panel">
+      <div class="quiz-container">
+        <!-- Quiz Control Bar -->
+        <div class="quiz-header-bar">
+          <div class="quiz-info">
+            <h2>模擬隨堂測驗模式</h2>
+            <p>重新挑戰這張「系統平台的組成架構－硬體」隨堂考卷，檢驗自我實力！</p>
+          </div>
+          <div class="quiz-tools">
+            <div class="timer-box">
+              <span class="timer-icon">⏱️</span>
+              <span id="quizTimer">00:00</span>
+            </div>
+            <div class="quiz-mode-select">
+              <label>
+                <input type="checkbox" id="instantFeedbackToggle" checked>
+                即時顯示正誤解析
+              </label>
+            </div>
+            <button id="resetQuizBtn" class="btn btn-outline">🔄 重做測驗</button>
+            <button id="submitQuizBtn" class="btn btn-primary">📤 繳交試卷計分</button>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="quiz-progress-wrapper">
+          <div class="progress-info">
+            <span>作答進度：<strong id="answeredCount">0</strong> / 13 題</span>
+            <span>當前預估得分：<strong id="liveScore">0</strong> / 52 分</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div id="quizProgressBar" class="progress-bar-fill" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Quiz Question List -->
+        <div id="quizQuestionsArea" class="quiz-questions-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Bottom Submit Button -->
+        <div class="quiz-footer-actions">
+          <button id="submitQuizBtnBottom" class="btn btn-primary btn-lg">📊 繳交考卷並查看成績分析</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 3: 錯題深度訂正 ================= -->
+    <section id="tab-correction" class="tab-panel">
+      <div class="correction-container">
+        <div class="correction-header">
+          <div class="banner-title">
+            <span class="badge-red">原卷失分分析</span>
+            <h2>本測驗卷 3 大錯題深度剖析與筆記還原</h2>
+            <p>這份考卷在第 1 頁共扣了 12 分（第 3、5、12 題）。以下為考卷上的紅色批改筆記、學生思維盲點與名師破題祕笈！</p>
+          </div>
+        </div>
+
+        <div class="wrong-questions-grid" id="wrongCardsArea">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 4: 第3章重點手冊 ================= -->
+    <section id="tab-notes" class="tab-panel">
+      <div class="notes-container">
+        <div class="notes-header">
+          <h2>《數位科技概論》第 3 章：系統平台的組成架構－核心觀念手冊</h2>
+          <p>高職資處科 / 商業經營科 / 電腦應試必讀精華重點整理</p>
+        </div>
+
+        <div class="knowledge-grid">
+          <!-- Card 1 -->
+          <div class="kb-card">
+            <div class="kb-card-header">
+              <span class="kb-icon">🏛️</span>
+              <h3>電腦五大單元（馮·紐曼架構）</h3>
+            </div>
+            <div class="kb-card-body">
+              <div class="unit-diagram">
+                <div class="unit-box unit-iu">輸入單元 (IU)<br><small>鍵盤、滑鼠、掃描器、相機傳輸</small></div>
+                <div class="unit-arrow">➔</div>
+                <div class="unit-group-cpu">
+                  <div class="cpu-title">中央處理單元 (CPU)</div>
+                  <div class="unit-box unit-cu">控制單元 (CU)<br><small>解碼、指揮排程 (如船長)</small></div>
+                  <div class="unit-box unit-alu">算術邏輯單元 (ALU)<br><small>加減乘除、比對運算</small></div>
+                  <div class="unit-box unit-reg">暫存器 (Registers)<br><small>高速微型記憶體</small></div>
+                </div>
+                <div class="unit-arrow">➔</div>
+                <div class="unit-box unit-ou">輸出單元 (OU)<br><small>螢幕、印表機、喇叭</small></div>
+              </div>
+              <div class="unit-box unit-mu" style="margin-top: 10px;">
+                記憶單元 (MU) — 存放程式指令、待處理資料與運算結果
+              </div>
+              <ul class="kb-list">
+                <li><strong>輸入單元 (IU)：</strong>將外界資料轉為二進位訊號輸入電腦。</li>
+                <li><strong>輸出單元 (OU)：</strong>將運算結果呈現給使用者（例如第 2 題列印設備）。</li>
+                <li><strong>控制單元 (CU)：</strong>解碼指令、控制電腦運作，比喻為「總指揮」、「大腦指揮官」（第 11 題星際迷航船長）。</li>
+                <li><strong>算術邏輯單元 (ALU)：</strong>負責計算與條件比對（第 9 題雲端中心海量比對運算）。</li>
+                <li><strong>記憶單元 (MU)：</strong>存放電腦程式與資料（第 3、4 題陷阱：不單單只放輸入待處理資料！）。</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="kb-card">
+            <div class="kb-card-header">
+              <span class="kb-icon">⚡</span>
+              <h3>CPU 與運算效能指標</h3>
+            </div>
+            <div class="kb-card-body">
+              <ul class="kb-list">
+                <li><strong>CPU 組成：</strong>由 <code>控制單元 (CU)</code> + <code>算術邏輯單元 (ALU)</code> + <code>暫存器 (Registers)</code> 組成（第 5 題）。</li>
+                <li><strong>64 位元電腦意義：</strong>指 CPU 內部的 <code>一般用途暫存器 (General Purpose Registers)</code> 寬度以及一次能處理的資料長度為 64 位元（第 12 題重點！）。</li>
+                <li><strong>MIPS 指標：</strong><code>Million Instructions Per Second</code>（每秒百萬個指令數）。其中 <code>I</code> 代表 <strong>Instruction（指令）</strong>（第 10 題）。</li>
+                <li><strong>提升系統效能關鍵元件：</strong>CPU 升級、擴充主記憶體 (RAM)、升級高階獨立顯示卡或換裝高速 NVMe SSD；而鍵盤、滑鼠屬於輸入設備，更換無法提升主機運算效能（第 13 題）。</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="kb-card">
+            <div class="kb-card-header">
+              <span class="kb-icon">💾</span>
+              <h3>記憶體家族大比拼 (SRAM vs DRAM)</h3>
+            </div>
+            <div class="kb-card-body">
+              <div class="table-responsive">
+                <table class="kb-table">
+                  <thead>
+                    <tr>
+                      <th>特性</th>
+                      <th>SRAM（靜態隨機存取）</th>
+                      <th>DRAM（動態隨機存取）</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>存取速度</strong></td>
+                      <td><span class="text-green font-bold">極快（優勢！）</span></td>
+                      <td>較慢</td>
+                    </tr>
+                    <tr>
+                      <td><strong>充電更新 (Refresh)</strong></td>
+                      <td><span class="text-green font-bold">不需要</span></td>
+                      <td><span class="text-red">需要定時充電更新</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>製造成本 / 密度</strong></td>
+                      <td>成本高、積體密度低</td>
+                      <td>成本低、密度高（容量大）</td>
+                    </tr>
+                    <tr>
+                      <td><strong>主要用途</strong></td>
+                      <td>CPU 快取記憶體 (L1/L2/L3 Cache)</td>
+                      <td>電腦主記憶體 (DDR4 / DDR5 RAM)</td>
+                    </tr>
+                    <tr>
+                      <td><strong>考卷關聯</strong></td>
+                      <td>第 1 題（SRAM 優點）</td>
+                      <td>第 8 題、第 12 題 (8GB 主記憶體)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="kb-card">
+            <div class="kb-card-header">
+              <span class="kb-icon">🔌</span>
+              <h3>插槽、匯流排與介面特性</h3>
+            </div>
+            <div class="kb-card-body">
+              <ul class="kb-list">
+                <li><strong>熱插拔 (Hot Swapping)：</strong>在電腦「開機運轉中」可以直接抽換連接設備，關機時亦可抽換（如 USB、隨身碟、外接硬碟），不需重新啟動主機（第 7 題）。</li>
+                <li><strong>主機板常見插槽用途：</strong>
+                  <ul>
+                    <li><code>記憶體插槽 (DIMM / SO-DIMM)</code>：筆電或桌機安插 RAM（第 8 題）。</li>
+                    <li><code>PCI-Express (PCIe) 插槽</code>：安裝獨立顯示卡、擴充高速介面卡。</li>
+                    <li><code>M.2 插槽</code>：安裝高速 NVMe / SATA SSD 固態硬碟或 Wi-Fi 無線網卡。</li>
+                    <li><code>CPU 插槽 (Socket)</code>：安裝中央處理器。</li>
+                  </ul>
+                </li>
+                <li><strong>I/O 定義：</strong><code>Input / Output</code>，即電腦系統與外部世界溝通的「輸入與輸出」（第 6 題）。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Flashcards -->
+        <div class="flashcards-section">
+          <h3>⚡ 考前 30 秒快閃翻牌複習</h3>
+          <p>點擊卡片翻面，快速牢記關鍵詞！</p>
+          <div class="flashcards-deck" id="flashcardsDeck">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 5: 實力弱點診斷 ================= -->
+    <section id="tab-analytics" class="tab-panel">
+      <div class="analytics-container">
+        <div class="analytics-header">
+          <h2>📊 考生作答能力診斷與成績報表</h2>
+          <p>根據此份隨堂考卷與模擬測驗作答數據進行的各向度能力評估</p>
+        </div>
+
+        <div class="analytics-metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" id="currentScoreDisplay">72 <small>/ 100</small></div>
+            <div class="metric-label">卷面成績換算 (第一頁答對率 76.9%)</div>
+            <div class="metric-desc">第一頁 13 題中答對 10 題，扣 12 分</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-value text-green">100%</div>
+            <div class="metric-label">I/O 與介面概念</div>
+            <div class="metric-desc">第 2、6、7、8、13 題全數答對</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-value text-amber">66.7%</div>
+            <div class="metric-label">記憶體架構概念</div>
+            <div class="metric-desc">第 1 題答對，但第 12 題誤認 8GB 為快取</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-value text-red">60.0%</div>
+            <div class="metric-label">五大單元與 CPU</div>
+            <div class="metric-desc">第 3 題 (MU功能) 與第 5 題 (CPU組合) 失分</div>
+          </div>
+        </div>
+
+        <!-- Radar/Bar Chart Simulation -->
+        <div class="chart-section">
+          <h3>📌 單元知識點掌握度長條圖</h3>
+          <div class="knowledge-bars">
+            <div class="kb-bar-item">
+              <div class="bar-label">
+                <span>五大單元架構與職責 (第 2, 3, 4, 11 題)</span>
+                <span>75%</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width: 75%; background-color: #3b82f6;"></div>
+              </div>
+            </div>
+
+            <div class="kb-bar-item">
+              <div class="bar-label">
+                <span>CPU 組成與規格位元數 (第 5, 9, 10, 12 題)</span>
+                <span>50%</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width: 50%; background-color: #ef4444;"></div>
+              </div>
+            </div>
+
+            <div class="kb-bar-item">
+              <div class="bar-label">
+                <span>RAM 種類與儲存插槽 (第 1, 8 題)</span>
+                <span>100%</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width: 100%; background-color: #10b981;"></div>
+              </div>
+            </div>
+
+            <div class="kb-bar-item">
+              <div class="bar-label">
+                <span>硬體周邊與效能升級 (第 6, 7, 13 題)</span>
+                <span>100%</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width: 100%; background-color: #10b981;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prescription & Action Items -->
+        <div class="prescription-card">
+          <h3>🎯 專屬提分複習處方</h3>
+          <ol class="prescription-list">
+            <li><strong>搞清楚 CPU 的三巨頭：</strong>牢記「中央處理單元 (CPU) = 控制單元 (CU) + 算術邏輯單元 (ALU) + 暫存器 (Registers)」，記憶單元 (MU) 屬於外部支援，千萬不要把 MU 選進 CPU 裡面！</li>
+            <li><strong>文字陷阱破解：</strong>題目若出現「『僅』儲存輸入待處理資料」，通常有詐！記憶體 (MU) 不只要放待處理資料，更要存放「程式指令」以及「處理完成之資料」。</li>
+            <li><strong>64 位元電腦本質：</strong>64 位元指的絕對不是時脈，也不是主記憶體或快取大小，而是 CPU 核心 <code>一般用途暫存器</code> 一次能容納的二進位位元寬度！</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Quiz Score Modal -->
+  <div id="scoreModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">🎉 模擬測驗成績出爐！</h3>
+        <button id="closeModalBtn" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-score-badge">
+          <div class="score-number" id="finalScoreText">52</div>
+          <div class="score-denom">/ 52 分</div>
+        </div>
+        <p id="modalFeedbackText" class="modal-feedback-msg"></p>
+        
+        <div class="modal-breakdown" id="modalBreakdownList">
+          <!-- Breakdown list -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="reviewErrorsBtn" class="btn btn-outline">查看錯題解析</button>
+        <button id="modalRetestBtn" class="btn btn-primary">重新測驗一次</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>資處科《數位科技概論》隨堂測驗互動輔導系統 ｜ 依據隨堂測驗卷第 3 回（試卷第1頁）高規格數位化製作</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
